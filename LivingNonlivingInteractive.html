@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Living and Nonliving Things - Interactive Lesson</title>
+    <style>
+        /* Global Styles & Variables */
+        :root {
+            --primary-color: #007bff; /* Blue */
+            --secondary-color: #6c757d; /* Gray */
+            --accent-color: #ffc107; /* Yellow */
+            --success-color: #28a745; /* Green */
+            --danger-color: #dc3545; /* Red */
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --background-color: #eef5ff; /* Light blue background */
+            --text-color: #212529;
+            --font-family: 'Poppins', sans-serif;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --padding: 20px;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: var(--padding);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #lesson-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: calc(var(--padding) * 1.5);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden; /* Contain animations */
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.8em;
+        }
+        h1 { font-size: 2em; text-align: center; }
+        h2 { font-size: 1.6em; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; margin-top: 1.5em;}
+        h3 { font-size: 1.3em; color: var(--secondary-color); }
+        p, li {
+            margin-bottom: 1em;
+            font-size: 1em;
+        }
+
+        /* Layout & Containers */
+        .lesson-section {
+            display: none; /* Hidden by default */
+            animation: slideInFade 0.5s ease-out forwards;
+            padding-bottom: 20px; /* Space for nav buttons */
+        }
+        .lesson-section.active {
+            display: block;
+        }
+        .content-block {
+            margin-bottom: 1.5em;
+            padding: var(--padding);
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+        }
+
+        /* Buttons */
+        button {
+            font-family: var(--font-family);
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 5px;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: var(--padding);
+            padding-top: var(--padding);
+            border-top: 1px solid #ddd;
+        }
+        .nav-buttons button {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #prev-btn {
+            background-color: var(--secondary-color);
+        }
+         #next-btn.finish-btn {
+            background-color: var(--success-color);
+        }
+
+
+        /* Difficulty Choice */
+        #difficulty-selection button {
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+            font-weight: 600;
+            padding: 15px 30px;
+        }
+        #difficulty-selection button:hover {
+            background-color: darken(var(--accent-color), 10%);
+        }
+
+        /* Icons & Emojis */
+        .icon-inline {
+            font-size: 1.2em; /* Slightly larger */
+            vertical-align: middle;
+            margin: 0 3px;
+        }
+        .icon-large {
+            font-size: 3em;
+            display: block;
+            text-align: center;
+            margin: 15px 0;
+            color: var(--primary-color);
+        }
+
+        /* Translatable Block & TTS */
+        .translatable-block {
+            position: relative;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .block-controls {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 5px;
+        }
+        .block-controls button {
+            background: none;
+            border: none;
+            font-size: 1.5em; /* Larger icons */
+            padding: 2px;
+            cursor: pointer;
+            color: var(--secondary-color);
+            transition: color 0.2s ease;
+        }
+         .block-controls button:hover {
+            color: var(--primary-color);
+            transform: none; /* Override general button hover */
+            box-shadow: none;
+        }
+        .translation-hint {
+            font-size: 0.8em;
+            color: #999;
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            display: none; /* Hidden until needed */
+        }
+        .translatable-block:hover .translation-hint {
+             display: block;
+        }
+
+        .tts-controls {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .tts-controls label {
+             font-size: 0.9em;
+             color: var(--secondary-color);
+        }
+        .tts-controls input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+        .tts-controls button {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 5px 10px;
+        }
+        .highlight {
+            background-color: var(--accent-color);
+            color: var(--dark-color); /* Ensure contrast */
+            border-radius: 3px;
+            padding: 0 2px;
+            box-decoration-break: clone; /* Handles wrapping */
+            -webkit-box-decoration-break: clone; /* For Safari */
+        }
+
+
+        /* Quiz Styling */
+        .quiz-container {
+            margin-top: 1.5em;
+            padding: var(--padding);
+            background-color: var(--light-color);
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+        }
+        .quiz-block {
+            margin-bottom: 1em;
+        }
+        .quiz-question {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .quiz-options button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 8px;
+            background-color: white;
+            border: 1px solid #ccc;
+            color: var(--text-color);
+            position: relative; /* For +1 effect */
+        }
+        .quiz-options button:hover:not(:disabled) {
+             border-color: var(--primary-color);
+             background-color: #f0f8ff; /* Light blue tint */
+        }
+        .quiz-options button.correct {
+            background-color: #e9f7ef; /* Light green */
+            border-color: var(--success-color);
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        .quiz-options button.incorrect {
+            background-color: #fdeded; /* Light red */
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+         .quiz-options button.answered:not(.correct):not(.incorrect) { /* Style other options after answer */
+            opacity: 0.7;
+            background-color: #eee;
+         }
+        .quiz-feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            animation: subtleBounceFeedback 0.5s ease;
+        }
+        .quiz-feedback.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .quiz-feedback.incorrect {
+            background-color: var(--danger-color);
+            color: white;
+             animation: gentleShakeFeedback 0.5s ease;
+        }
+
+        /* Score & Gamification */
+        #score-area {
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .plus-one-effect {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--success-color);
+            opacity: 0;
+            animation: floatUpFade 1s ease-out forwards;
+        }
+        #final-results {
+            text-align: center;
+            padding: 30px;
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+        }
+        #final-results h2 {
+             color: var(--primary-color);
+        }
+        #final-score {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--success-color);
+            display: block;
+            margin: 10px 0;
+        }
+
+        /* Animations */
+        @keyframes slideInFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatUpFade {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1.5); } /* Moves up from center */
+        }
+
+         /* Plus one positioning fix attempt */
+        .quiz-options button span.plus-one-effect {
+            position: absolute;
+            right: 15px; /* Adjust as needed */
+            top: 50%;
+            transform: translateY(-50%); /* Center vertically */
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--success-color);
+            opacity: 0; /* Start hidden */
+            pointer-events: none; /* Prevent interaction */
+            animation: floatUpFade 1s ease-out forwards;
+        }
+
+        @keyframes subtleBounceFeedback {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+         @keyframes gentleShakeFeedback {
+              10%, 90% { transform: translateX(-1px); }
+              20%, 80% { transform: translateX(2px); }
+              30%, 50%, 70% { transform: translateX(-3px); }
+              40%, 60% { transform: translateX(3px); }
+         }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            #lesson-container { padding: var(--padding); }
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.4em; }
+            h3 { font-size: 1.2em; }
+            p, li { font-size: 0.95em; }
+            button { padding: 8px 15px; font-size: 0.95em;}
+             .nav-buttons { flex-direction: column-reverse; gap: 10px; }
+             .nav-buttons button { width: 100%; }
+            .tts-controls { flex-direction: column; align-items: stretch; gap: 10px;}
+            .block-controls { top: 5px; right: 5px; }
+            .block-controls button { font-size: 1.3em; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="lesson-container">
+
+        <!-- Score Area -->
+        <div id="score-area">Score: <span id="current-score">0</span></div>
+
+        <!-- Difficulty Selection (Initial Screen) -->
+        <div id="difficulty-selection" class="lesson-section active">
+            <h1>Living and Nonliving Things</h1>
+            <p style="text-align:center;">By: Teacher John (IP 2 Science)</p>
+            <div class="icon-large">🌍</div>
+            <h2>Choose your level:</h2>
+            <div style="text-align:center;">
+                <button onclick="startLesson('easy')">Easy English 😊</button>
+                <button onclick="startLesson('challenge')">Challenge English 😎</button>
+            </div>
+        </div>
+
+        <!-- Lesson Sections -->
+        <div id="section-1" class="lesson-section">
+            <div class="translatable-block">
+                <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="What are Living Things? 🌱➡️🌳"
+                    data-challenge="What is a Living Thing? 🌱➡️🌳">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Living things grow bigger. They change. They can make babies or young ones. 👨‍👩‍👧‍👦"
+                   data-challenge="A living thing is something that grows, changes, and produces offspring (makes more like itself). 👨‍👩‍👧‍👦">
+                   [Paragraph Text Will Load Here]
+                </p>
+                <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+            </div>
+
+            <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q1">
+                    <p class="quiz-question"
+                       data-easy="Is a tree 🌲 living?"
+                       data-challenge="Is a tree 🌲 a living or nonliving thing?">
+                       [Question Text Will Load Here]
+                    </p>
+                    <div class="quiz-options">
+                        <button data-correct="true"
+                                data-easy="Yes, it's living"
+                                data-challenge="Living">
+                                [Option 1 Text Will Load Here]
+                        </button>
+                        <button data-correct="false"
+                                data-easy="No, it's nonliving"
+                                data-challenge="Nonliving">
+                                [Option 2 Text Will Load Here]
+                        </button>
+                    </div>
+                    <div class="quiz-feedback" style="display: none;"></div>
+                </div>
+                 <div class="quiz-block" data-quiz-id="q2">
+                    <p class="quiz-question"
+                       data-easy="Is a car 🚗 living?"
+                       data-challenge="Is a car 🚗 a living or nonliving thing?">
+                       [Question Text Will Load Here]
+                    </p>
+                    <div class="quiz-options">
+                         <button data-correct="false"
+                                data-easy="Yes, it's living"
+                                data-challenge="Living">
+                                [Option 1 Text Will Load Here]
+                        </button>
+                        <button data-correct="true"
+                                data-easy="No, it's nonliving"
+                                data-challenge="Nonliving">
+                                [Option 2 Text Will Load Here]
+                        </button>
+                    </div>
+                    <div class="quiz-feedback" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-2" class="lesson-section">
+            <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="What are Nonliving Things? 🧱💻"
+                    data-challenge="What is a Nonliving Thing? 🧱💻">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Nonliving things do not grow bigger. They do not change. They cannot make babies or young ones."
+                   data-challenge="A nonliving thing is something that does not grow, change, or produce offspring (does not make babies).">
+                   [Paragraph Text Will Load Here]
+                </p>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+            </div>
+        </div>
+
+        <div id="section-3" class="lesson-section">
+             <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="Natural and Man-Made Things"
+                    data-challenge="Natural vs. Man-Made Nonliving Things">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Some nonliving things are natural. Nature makes them (like rocks 🪨). Some nonliving things are man-made. People make them (like toys 🧸)."
+                   data-challenge="Nonliving things can be natural (found in nature, not made by people) or man-made (made by people).">
+                   [Paragraph Text Will Load Here]
+                </p>
+                <ul data-easy="<li>Natural: Rock 🪨, Mountain ⛰️</li><li>Man-made: Toy 🧸, Airplane ✈️</li>"
+                    data-challenge="<li>Examples of Natural: Rock 🪨, Mountain ⛰️, River</li><li>Examples of Man-made: Toy 🧸, Airplane ✈️, Book 📖, House 🏠</li>">
+                   [List Items Will Load Here]
+                </ul>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+            </div>
+
+             <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q3">
+                    <p class="quiz-question"
+                       data-easy="Is a river 🏞️ natural or man-made?"
+                       data-challenge="Is a river 🏞️ natural or man-made?">
+                       [Question Text Will Load Here]
+                    </p>
+                    <div class="quiz-options">
+                        <button data-correct="true"
+                                data-easy="Natural"
+                                data-challenge="Natural">
+                                [Option 1 Text Will Load Here]
+                        </button>
+                        <button data-correct="false"
+                                data-easy="Man-made"
+                                data-challenge="Man-made">
+                                [Option 2 Text Will Load Here]
+                        </button>
+                    </div>
+                    <div class="quiz-feedback" style="display: none;"></div>
+                </div>
+                 <div class="quiz-block" data-quiz-id="q4">
+                    <p class="quiz-question"
+                       data-easy="Is a plastic bottle 🧴 natural or man-made?"
+                       data-challenge="Is a plastic bottle 🧴 natural or man-made?">
+                       [Question Text Will Load Here]
+                    </p>
+                    <div class="quiz-options">
+                         <button data-correct="false"
+                                data-easy="Natural"
+                                data-challenge="Natural">
+                                [Option 1 Text Will Load Here]
+                        </button>
+                        <button data-correct="true"
+                                data-easy="Man-made"
+                                data-challenge="Man-made">
+                                [Option 2 Text Will Load Here]
+                        </button>
+                    </div>
+                    <div class="quiz-feedback" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+         <div id="section-4" class="lesson-section">
+             <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="What Living Things Need 🤔"
+                    data-challenge="What Do Living Things Need? 🤔">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Living things need 4 main things to live:"
+                   data-challenge="All living things need certain things to survive. The main needs are:">
+                   [Paragraph Text Will Load Here]
+                </p>
+                <ul>
+                    <li data-easy="💧 Water" data-challenge="💧 Water">Water</li>
+                    <li data-easy="🌬️ Air" data-challenge="🌬️ Air">Air</li>
+                    <li data-easy="🏠 A Place to Live (Habitat)" data-challenge="🏠 A Habitat (Home/Environment)">Habitat</li>
+                    <li data-easy="🍎 Food (Energy)" data-challenge="🍎 Food (for Energy)">Food</li>
+                </ul>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+            </div>
+             <!-- Maybe add a simple matching interaction here later -->
+        </div>
+
+        <div id="section-5" class="lesson-section">
+            <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="Need: Water 💧" data-challenge="Need: Water 💧">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Living things need water. People need water. Some animals live in fresh water (like rivers 🏞️). Some live in salt water (like oceans 🌊)."
+                   data-challenge="All living things need water to survive. Humans need fresh water. Some animals and plants live in fresh water (rivers, lakes), while others live in saltwater (oceans 🌊). Some desert plants 🌵 and animals 🐫 are special and can live a long time without water.">
+                    [Paragraph Text Will Load Here]
+                </p>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+            </div>
+            <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q5">
+                    <p class="quiz-question"
+                       data-easy="Do people drink saltwater from the ocean? 🤔"
+                       data-challenge="Can humans survive by drinking saltwater from the ocean? 🤔">
+                       [Question Text Will Load Here]
+                    </p>
+                    <div class="quiz-options">
+                        <button data-correct="false"
+                                data-easy="Yes"
+                                data-challenge="Yes">
+                                [Option 1 Text Will Load Here]
+                        </button>
+                        <button data-correct="true"
+                                data-easy="No"
+                                data-challenge="No">
+                                [Option 2 Text Will Load Here]
+                        </button>
+                    </div>
+                    <div class="quiz-feedback" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+         <div id="section-6" class="lesson-section">
+             <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="Need: Air 🌬️" data-challenge="Need: Air 🌬️">
+                   [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Living things need air. We need clean air. Plants 🌳 help make the air clean."
+                   data-challenge="Living things need air to breathe. Clean air is important for health. Air pollution (bad air from cars 🚗 or factories 🏭) is harmful. Plants 🌳 are amazing because they help clean the air!">
+                    [Paragraph Text Will Load Here]
+                </p>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+             </div>
+             <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q6">
+                     <p class="quiz-question"
+                        data-easy="Do plants 🌳 help clean the air?"
+                        data-challenge="Do plants 🌳 help make the air cleaner?">
+                        [Question Text Will Load Here]
+                     </p>
+                     <div class="quiz-options">
+                         <button data-correct="true"
+                                 data-easy="Yes"
+                                 data-challenge="Yes, they do">
+                                 [Option 1 Text Will Load Here]
+                         </button>
+                         <button data-correct="false"
+                                 data-easy="No"
+                                 data-challenge="No, they don't">
+                                 [Option 2 Text Will Load Here]
+                         </button>
+                     </div>
+                     <div class="quiz-feedback" style="display: none;"></div>
+                 </div>
+             </div>
+        </div>
+
+        <div id="section-7" class="lesson-section">
+             <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="Need: Habitat (Home) 🏠"
+                    data-challenge="Need: Habitat and Shelter 🏠">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Living things need a home 🏠. This home is called a habitat. It gives food 🍎 and water 💧. Shelter is a safe place in the habitat. It protects from bad weather ⛈️ or danger (like a nest 🐦 or cave 🦇)."
+                   data-challenge="Living things need a habitat. A habitat is the natural home where a plant or animal lives. It provides the food, water, and space they need. Shelter is a safe place within the habitat (like a bird's nest 🐦, a rabbit's burrow, or a cave 🦇) that protects living things from dangerous weather ⛈️ or other animals 🐻.">
+                    [Paragraph Text Will Load Here]
+                </p>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+             </div>
+              <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q7">
+                     <p class="quiz-question"
+                        data-easy="Why do animals need shelter?"
+                        data-challenge="What is the main purpose of shelter for an animal?">
+                        [Question Text Will Load Here]
+                     </p>
+                     <div class="quiz-options">
+                           <button data-correct="false"
+                                 data-easy="To play games"
+                                 data-challenge="For entertainment">
+                                 [Option 1 Text Will Load Here]
+                         </button>
+                         <button data-correct="true"
+                                 data-easy="To stay safe"
+                                 data-challenge="To stay safe from weather and danger">
+                                 [Option 2 Text Will Load Here]
+                         </button>
+                          <button data-correct="false"
+                                 data-easy="To find friends"
+                                 data-challenge="To socialize">
+                                 [Option 3 Text Will Load Here]
+                         </button>
+                     </div>
+                     <div class="quiz-feedback" style="display: none;"></div>
+                 </div>
+             </div>
+        </div>
+
+         <div id="section-8" class="lesson-section">
+             <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="Types of Habitats" data-challenge="Exploring Different Habitats">
+                  [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="There are many kinds of homes (habitats) on Earth."
+                   data-challenge="Habitats can be very different depending on the climate and location. Let's look at a few examples.">
+                  [Paragraph Text Will Load Here]
+                </p>
+                <h3 data-easy="Land Habitats 🌲🏜️❄️" data-challenge="Land Habitats 🌲🏜️❄️">Land Habitats</h3>
+                 <ul>
+                    <li data-easy="Desert 🏜️: Very dry, little rain."
+                        data-challenge="Desert 🏜️: A very dry habitat with little rainfall. Plants and animals here are adapted to conserve water.">Desert</li>
+                    <li data-easy="Forest 🌲: Many trees."
+                        data-challenge="Forest 🌲: A habitat with many trees, receiving enough rain and warmth. Some forests have cold seasons where trees lose leaves.">Forest</li>
+                    <li data-easy="Rainforest 🌧️🌴: Wet, rains a lot. Many plants & animals."
+                        data-challenge="Rainforest 🌧️🌴: A habitat with warm weather and rain almost every day. Home to a huge variety of plants and animals.">Rainforest</li>
+                    <li data-easy="Tundra ❄️: Very cold and windy."
+                        data-challenge="Tundra ❄️: A cold, windy habitat, often covered in ice/snow. Summers are short, so few trees can grow.">Tundra</li>
+                 </ul>
+                 <h3 data-easy="Water Habitats 🏞️🌊" data-challenge="Water Habitats 🏞️🌊">Water Habitats</h3>
+                  <ul>
+                     <li data-easy="Pond 🏞️: Small fresh water home."
+                         data-challenge="Pond 🏞️: A small body of freshwater, often home to smaller plants, insects, frogs 🐸, and fish.">Pond</li>
+                     <li data-easy="Ocean 🌊: Big saltwater home."
+                         data-challenge="Ocean 🌊: A very large body of saltwater. Home to countless creatures, from tiny plankton to huge whales 🐳.">Ocean</li>
+                  </ul>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+             </div>
+               <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q8">
+                     <p class="quiz-question"
+                        data-easy="Which habitat is very COLD and WINDY?"
+                        data-challenge="Which land habitat is known for being extremely cold and windy with short summers?">
+                        [Question Text Will Load Here]
+                     </p>
+                     <div class="quiz-options">
+                           <button data-correct="false" data-easy="Desert 🏜️" data-challenge="Desert 🏜️">Desert</button>
+                           <button data-correct="false" data-easy="Rainforest 🌧️🌴" data-challenge="Rainforest 🌧️🌴">Rainforest</button>
+                           <button data-correct="true" data-easy="Tundra ❄️" data-challenge="Tundra ❄️">Tundra</button>
+                           <button data-correct="false" data-easy="Forest 🌲" data-challenge="Forest 🌲">Forest</button>
+                     </div>
+                     <div class="quiz-feedback" style="display: none;"></div>
+                 </div>
+                   <div class="quiz-block" data-quiz-id="q9">
+                     <p class="quiz-question"
+                        data-easy="Is an Ocean 🌊 freshwater or saltwater?"
+                        data-challenge="Is the water in the Ocean 🌊 fresh or salty?">
+                        [Question Text Will Load Here]
+                     </p>
+                     <div class="quiz-options">
+                           <button data-correct="false" data-easy="Fresh water" data-challenge="Freshwater">Fresh</button>
+                           <button data-correct="true" data-easy="Salt water" data-challenge="Saltwater">Salt</button>
+                     </div>
+                     <div class="quiz-feedback" style="display: none;"></div>
+                 </div>
+             </div>
+        </div>
+
+         <div id="section-9" class="lesson-section">
+            <div class="translatable-block">
+                 <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                <h2 data-easy="Need: Food (Energy!) 🍎⚡" data-challenge="Need: Food for Energy 🍎⚡">
+                    [Heading Text Will Load Here]
+                </h2>
+                <p data-easy="Living things need food for energy. Energy helps them move and grow."
+                   data-challenge="Living things eat food to get energy. Energy powers everything they do, like moving, growing, and staying warm.">
+                    [Paragraph Text Will Load Here]
+                </p>
+                 <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+             </div>
+
+             <div class="translatable-block">
+                  <div class="block-controls">
+                    <button class="speak-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>
+                    <button class="translate-btn" title="Translate Block" aria-label="Translate Block">🇹🇭</button>
+                </div>
+                 <h3 data-easy="What do they eat?" data-challenge="Food Categories">
+                     [Sub-heading Text Will Load Here]
+                 </h3>
+                <ul>
+                    <li data-easy="Herbivores eat plants 🌿 (like rabbits 🐰)."
+                        data-challenge="<strong>Herbivores</strong> are animals that eat only plants 🌿 (Examples: rabbit 🐰, cow 🐮, deer 🦌).">Herbivores...</li>
+                    <li data-easy="Carnivores eat meat 🥩 (like tigers 🐅)."
+                        data-challenge="<strong>Carnivores</strong> are animals that eat only other animals (meat) 🥩 (Examples: tiger 🐅, lion 🦁, shark 🦈).">Carnivores...</li>
+                    <li data-easy="Omnivores eat plants AND meat (like bears 🐻)."
+                        data-challenge="<strong>Omnivores</strong> are animals that eat both plants 🌿 and animals 🥩 (Examples: bear 🐻, pig 🐷, human 🧍).">Omnivores...</li>
+                </ul>
+                <p data-easy="Plants use the sun ☀️ to make their own food!"
+                    data-challenge="Plants are special! They don't eat other things; they make their own food using energy from the sun ☀️, water 💧, and air 🌬️. This process is called photosynthesis.">
+                    [Paragraph Text Will Load Here]
+                 </p>
+                  <span class="translation-hint" aria-hidden="true">Click 🇹🇭 to translate | Double-click a word</span>
+             </div>
+
+             <div class="quiz-container">
+                 <div class="quiz-block" data-quiz-id="q10">
+                     <p class="quiz-question"
+                        data-easy="What does a HERBIVORE eat?"
+                        data-challenge="An animal that only eats plants 🌿 is called a...">
+                        [Question Text Will Load Here]
+                     </p>
+                     <div class="quiz-options">
+                           <button data-correct="true" data-easy="Plants 🌿" data-challenge="Herbivore">Plants</button>
+                           <button data-correct="false" data-easy="Meat 🥩" data-challenge="Carnivore">Meat</button>
+                           <button data-correct="false" data-easy="Plants AND Meat" data-challenge="Omnivore">Both</button>
+                     </div>
+                     <div class="quiz-feedback" style="display: none;"></div>
+                 </div>
+                 <div class="quiz-block" data-quiz-id="q11">
+                     <p class="quiz-question"
+                        data-easy="What type are humans 🧍?"
+                        data-challenge="Humans 🧍 eat things like fruits 🍓, vegetables 🥕, and meat 🍗. What type are humans?">
+                        [Question Text Will Load Here]
+                     </p>
+                     <div class="quiz-options">
+                           <button data-correct="false" data-easy="Herbivore" data-challenge="Herbivore">Herbivore</button>
+                           <button data-correct="false" data-easy="Carnivore" data-challenge="Carnivore">Carnivore</button>
+                           <button data-correct="true" data-easy="Omnivore" data-challenge="Omnivore">Omnivore</button>
+                     </div>
+                     <div class="quiz-feedback" style="display: none;"></div>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Final Results Section -->
+         <div id="section-10" class="lesson-section">
+              <div id="final-results" style="display: none;"> <!-- Initially hidden -->
+                  <h2>🎉 Lesson Complete! 🎉</h2>
+                  <p>Well done! You finished the lesson.</p>
+                  <p>Your final score is:</p>
+                  <span id="final-score">0</span> / <span id="total-questions">0</span>
+                  <!-- Optional: High score display could go here -->
+              </div>
+        </div>
+
+        <!-- Text-to-Speech Controls (Shared) -->
+        <div class="tts-controls" style="display: none;"> <!-- Initially hidden -->
+             <label for="rate">Speed:</label>
+             <input type="range" id="rate" name="rate" min="0.5" max="2" value="1" step="0.1">
+             <button id="stop-btn" onclick="stopSpeaking()">Stop ⏹️</button>
+        </div>
+
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <button id="prev-btn" onclick="navigate(-1)" disabled>⬅️ Previous</button>
+            <button id="next-btn" onclick="navigate(1)" disabled>Next ➡️</button> <!-- Initially disabled until difficulty chosen or quiz passed -->
+        </div>
+
+    </div><!-- End #lesson-container -->
+
+    <script>
+        // --- Configuration ---
+        const TOTAL_SECTIONS = 10; // Number of content sections (excluding difficulty selection)
+        const TOTAL_QUIZZES = 11; // Total number of quiz questions across all sections
+        const LANGUAGE_CODE = 'th'; // Target language for translation (Thai)
+
+        // --- State Variables ---
+        let currentSectionIndex = 0; // 0 is difficulty screen
+        let difficulty = 'easy'; // 'easy' or 'challenge'
+        let currentScore = 0;
+        let lessonSections;
+        let quizBlocks;
+        let scoreNeedsUpdate = false; // Flag to update score display
+
+        // For TTS
+        let utterance = null;
+        let synth = window.speechSynthesis;
+        let currentSpokenBlock = null;
+        let wordSpans = [];
+        let currentWordIndex = 0;
+
+        // --- DOM Elements ---
+        const lessonContainer = document.getElementById('lesson-container');
+        const difficultyScreen = document.getElementById('difficulty-selection');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreDisplay = document.getElementById('current-score');
+        const finalResultsDiv = document.getElementById('final-results');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const totalQuestionsDisplay = document.getElementById('total-questions');
+        const ttsControlsDiv = document.querySelector('.tts-controls');
+        const rateSlider = document.getElementById('rate');
+        const stopBtn = document.getElementById('stop-btn');
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lessonSections = lessonContainer.querySelectorAll('.lesson-section:not(#difficulty-selection)');
+            quizBlocks = lessonContainer.querySelectorAll('.quiz-block');
+             // Ensure initial state is correct
+             showSection(currentSectionIndex);
+             updateNavButtons();
+             updateScoreDisplay(); // Show initial score 0
+
+             // Add double-click listener for word translation
+             lessonContainer.addEventListener('dblclick', handleWordDoubleClick);
+
+             // Add listeners for TTS controls
+             rateSlider.addEventListener('input', updateSpeechSpeed);
+
+              // Clean up TTS if the window is closed/navigated away
+             window.addEventListener('beforeunload', () => {
+                if (synth.speaking) {
+                    synth.cancel();
+                }
+            });
+        });
+
+        function startLesson(level) {
+            difficulty = level;
+            difficultyScreen.classList.remove('active');
+            currentSectionIndex = 1; // Move to the first content section
+            updateContentForDifficulty();
+            showSection(currentSectionIndex);
+            updateNavButtons();
+            ttsControlsDiv.style.display = 'flex'; // Show TTS controls
+        }
+
+        function updateContentForDifficulty() {
+            const elementsToUpdate = lessonContainer.querySelectorAll('[data-easy], [data-challenge]');
+            elementsToUpdate.forEach(el => {
+                const easyText = el.getAttribute('data-easy');
+                const challengeText = el.getAttribute('data-challenge');
+
+                 // Prioritize specific difficulty, fallback gracefully
+                 let textToShow = (difficulty === 'easy' && easyText) ? easyText : challengeText;
+                 if (!textToShow) textToShow = easyText || challengeText || el.innerHTML; // Fallback if one is missing
+
+                 // Use innerHTML because data attributes might contain simple HTML (like <strong>) or emojis
+                 el.innerHTML = textToShow;
+
+                 // Special handling for list items if data is on UL
+                 if (el.tagName === 'UL' && el.children.length === 0) { // Check if list items need generating
+                    const listHtml = textToShow; // The attribute contains the <li> structure
+                    el.innerHTML = listHtml;
+                    // Re-query children to apply data attributes if needed (though unlikely if structure is in UL data)
+                    const listItems = el.querySelectorAll('li[data-easy], li[data-challenge]');
+                     listItems.forEach(li => {
+                         const liEasy = li.getAttribute('data-easy');
+                         const liChallenge = li.getAttribute('data-challenge');
+                         let liText = (difficulty === 'easy' && liEasy) ? liEasy : liChallenge;
+                         if (!liText) liText = liEasy || liChallenge || li.innerHTML;
+                         li.innerHTML = liText;
+                    });
+
+                 } else if (el.tagName === 'LI') {
+                      // If individual LIs have data attributes (preferred method)
+                     el.innerHTML = textToShow;
+                 }
+
+            });
+
+             // Re-attach listeners to newly potentially created elements inside blocks
+             attachBlockControlListeners();
+        }
+
+        function attachBlockControlListeners() {
+             // Remove old listeners to prevent duplicates if function is called multiple times
+             lessonContainer.querySelectorAll('.speak-btn').forEach(btn => {
+                 const newBtn = btn.cloneNode(true);
+                 btn.parentNode.replaceChild(newBtn, btn); // Replace node to remove listeners
+                 newBtn.addEventListener('click', handleSpeakClick);
+             });
+             lessonContainer.querySelectorAll('.translate-btn').forEach(btn => {
+                 const newBtn = btn.cloneNode(true);
+                 btn.parentNode.replaceChild(newBtn, btn);
+                 newBtn.addEventListener('click', handleTranslateBlockClick);
+             });
+        }
+
+
+        // --- Navigation ---
+        function showSection(index) {
+             // Hide all content sections
+             lessonSections.forEach(section => section.classList.remove('active'));
+
+            // Show the target section
+            if (index > 0 && index <= TOTAL_SECTIONS) {
+                const targetSection = document.getElementById(`section-${index}`);
+                if (targetSection) {
+                     targetSection.classList.add('active');
+                     // Reset quiz states in the new section if not answered
+                     targetSection.querySelectorAll('.quiz-block').forEach(qb => {
+                         if (!qb.classList.contains('answered')) {
+                             resetQuizBlock(qb);
+                         }
+                     });
+                      checkNextButtonStatus(targetSection); // Enable/disable next based on quizzes in THIS section
+                      // Stop any ongoing speech when changing sections
+                      stopSpeaking();
+                }
+            } else if (index === 0) {
+                 difficultyScreen.classList.add('active');
+                 ttsControlsDiv.style.display = 'none'; // Hide TTS controls on difficulty screen
+            } else if (index > TOTAL_SECTIONS) {
+                 // Handle reaching the end (should be handled by navigate function)
+                 showFinalScoreScreen();
+            }
+
+             // Scroll to top of lesson container smoothly
+             lessonContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function navigate(direction) {
+            const newIndex = currentSectionIndex + direction;
+
+            if (newIndex >= 0 && newIndex <= TOTAL_SECTIONS + 1) { // Allow navigating to final screen state
+                currentSectionIndex = newIndex;
+
+                if (currentSectionIndex > TOTAL_SECTIONS) {
+                     showFinalScoreScreen();
+                } else {
+                     showSection(currentSectionIndex);
+                     updateNavButtons();
+                }
+            }
+        }
+
+        function updateNavButtons() {
+            prevBtn.disabled = (currentSectionIndex <= 1); // Disable prev on the first content section
+            nextBtn.disabled = true; // Default to disabled
+
+            if (currentSectionIndex === 0) { // Difficulty screen
+                prevBtn.disabled = true;
+                nextBtn.disabled = true; // Must choose difficulty
+            } else if (currentSectionIndex > 0 && currentSectionIndex <= TOTAL_SECTIONS) {
+                 const currentSectionElement = document.getElementById(`section-${currentSectionIndex}`);
+                 checkNextButtonStatus(currentSectionElement); // Enable based on quiz state
+            }
+
+            // Change 'Next' to 'Finish' on the last content section
+            if (currentSectionIndex === TOTAL_SECTIONS) {
+                nextBtn.textContent = 'Finish 🎉';
+                nextBtn.classList.add('finish-btn');
+            } else {
+                nextBtn.textContent = 'Next ➡️';
+                nextBtn.classList.remove('finish-btn');
+            }
+
+             // If we are on the pseudo "final screen" state
+             if (currentSectionIndex > TOTAL_SECTIONS) {
+                 prevBtn.disabled = false; // Allow going back from final score
+                 nextBtn.disabled = true; // No next from final score
+                 nextBtn.textContent = 'Next ➡️'; // Reset text
+                 nextBtn.classList.remove('finish-btn');
+             }
+        }
+
+         function checkNextButtonStatus(sectionElement) {
+             if (!sectionElement) {
+                 nextBtn.disabled = true;
+                 return;
+             }
+             const quizzesInSection = sectionElement.querySelectorAll('.quiz-block');
+             if (quizzesInSection.length === 0) {
+                 nextBtn.disabled = false; // No quizzes, can proceed
+             } else {
+                 // Check if ALL quizzes in *this* section are answered
+                 const allAnswered = Array.from(quizzesInSection).every(qb => qb.classList.contains('answered'));
+                 nextBtn.disabled = !allAnswered;
+             }
+         }
+
+         function resetQuizBlock(quizBlock) {
+            quizBlock.classList.remove('answered');
+            const options = quizBlock.querySelectorAll('.quiz-options button');
+            options.forEach(button => {
+                button.disabled = false;
+                button.classList.remove('correct', 'incorrect', 'answered');
+                 // Remove +1 effect if present
+                 const plusOne = button.querySelector('.plus-one-effect');
+                 if (plusOne) plusOne.remove();
+            });
+            const feedback = quizBlock.querySelector('.quiz-feedback');
+            feedback.style.display = 'none';
+            feedback.textContent = '';
+            feedback.classList.remove('correct', 'incorrect');
+        }
+
+        // --- Quizzes & Scoring ---
+        function handleQuizAnswer(button, quizId) {
+             const quizBlock = button.closest('.quiz-block');
+             if (quizBlock.classList.contains('answered')) return; // Already answered
+
+             const options = quizBlock.querySelectorAll('.quiz-options button');
+             const feedback = quizBlock.querySelector('.quiz-feedback');
+             const isCorrect = button.getAttribute('data-correct') === 'true';
+
+             quizBlock.classList.add('answered'); // Mark block as answered
+
+             // Disable all options in this block
+             options.forEach(opt => {
+                 opt.disabled = true;
+                 opt.classList.add('answered'); // Mark individual buttons too for styling
+            });
+
+             if (isCorrect) {
+                 button.classList.add('correct');
+                 feedback.textContent = 'Correct! 👍';
+                 feedback.className = 'quiz-feedback correct'; // Use className to overwrite previous
+                 feedback.style.display = 'block';
+                 currentScore++;
+                 scoreNeedsUpdate = true; // Flag score update
+                 // Add +1 animation
+                 const plusOne = document.createElement('span');
+                 plusOne.className = 'plus-one-effect';
+                 plusOne.textContent = '+1';
+                 button.appendChild(plusOne); // Append to the button itself
+                 plusOne.addEventListener('animationend', () => plusOne.remove()); // Clean up animation element
+             } else {
+                 button.classList.add('incorrect');
+                 feedback.textContent = 'Not quite. Try remembering!';
+                 feedback.className = 'quiz-feedback incorrect';
+                 feedback.style.display = 'block';
+                 // Highlight the correct answer
+                 options.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct'); // Show the correct one
+                     }
+                 });
+             }
+
+             // Check if all quizzes in the current section are now answered
+              const currentSectionElement = document.getElementById(`section-${currentSectionIndex}`);
+              checkNextButtonStatus(currentSectionElement);
+
+             // Update score display immediately after potentially changing it
+             if (scoreNeedsUpdate) {
+                 updateScoreDisplay();
+                 scoreNeedsUpdate = false; // Reset flag
+             }
+        }
+
+         // Attach initial listeners to quiz buttons
+         quizBlocks.forEach(qb => {
+             const buttons = qb.querySelectorAll('.quiz-options button');
+             const quizId = qb.getAttribute('data-quiz-id');
+             buttons.forEach(button => {
+                 button.addEventListener('click', () => handleQuizAnswer(button, quizId));
+             });
+         });
+
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = currentScore;
+        }
+
+        function showFinalScoreScreen() {
+             // Hide all other sections and controls except score
+            lessonSections.forEach(section => section.classList.remove('active'));
+             difficultyScreen.classList.remove('active');
+             ttsControlsDiv.style.display = 'none';
+
+             // Show final results
+             finalScoreDisplay.textContent = currentScore;
+             totalQuestionsDisplay.textContent = TOTAL_QUIZZES;
+             finalResultsDiv.style.display = 'block';
+
+             // Ensure navigation buttons are updated for the final screen state
+             currentSectionIndex = TOTAL_SECTIONS + 1; // Set a state representing the final screen
+             updateNavButtons();
+             lessonContainer.scrollTo({ top: 0, behavior: 'smooth' });
+             stopSpeaking(); // Stop TTS if it was running
+        }
+
+
+        // --- Translation ---
+        function handleWordDoubleClick(event) {
+            const selectedText = window.getSelection().toString().trim();
+            // Check if the double-click was on actual text within a translatable block
+            if (selectedText && selectedText.length > 0 && event.target.closest('.translatable-block')) {
+                 // Avoid translating very short selections or numbers if desired
+                 if (selectedText.length > 1 && !/^\d+$/.test(selectedText)) {
+                      translateWord(selectedText);
+                 }
+            }
+        }
+
+        function translateWord(word) {
+            if (!word) return;
+            const googleTranslateUrl = `https://translate.google.com/?sl=en&tl=${LANGUAGE_CODE}&text=${encodeURIComponent(word)}&op=translate`;
+            window.open(googleTranslateUrl, '_blank');
+        }
+
+        function handleTranslateBlockClick(event) {
+            const button = event.target.closest('button'); // Ensure we get the button element
+            const block = button.closest('.translatable-block');
+            if (block) {
+                 translateSentence(block);
+            }
+        }
+
+        function translateSentence(blockElement) {
+            if (!blockElement) return;
+            // Clone the block to avoid modifying the original
+            const blockClone = blockElement.cloneNode(true);
+
+            // Remove controls and hints from the clone before extracting text
+            blockClone.querySelectorAll('.block-controls, .translation-hint, .quiz-container').forEach(el => el.remove());
+
+             // Get text content, which strips HTML tags but keeps line breaks somewhat
+             let text = blockClone.textContent.trim();
+
+             // Clean up extra whitespace and multiple line breaks that textContent might leave
+             text = text.replace(/\s+/g, ' ').trim();
+
+            if (!text) return;
+
+            const googleTranslateUrl = `https://translate.google.com/?sl=en&tl=${LANGUAGE_CODE}&text=${encodeURIComponent(text)}&op=translate`;
+            window.open(googleTranslateUrl, '_blank');
+        }
+
+        // --- Text-to-Speech ---
+
+         function updateSpeechSpeed() {
+             if (utterance) {
+                 // Update rate immediately if speaking
+                 synth.cancel(); // Stop current speech
+                 utterance.rate = rateSlider.value;
+                 synth.speak(utterance); // Restart with new rate
+             }
+             // The rate will be applied next time speakBlockText is called anyway
+         }
+
+         function stopSpeaking() {
+             if (synth.speaking) {
+                 synth.cancel(); // Stops speech synthesis
+             }
+             // Remove any existing highlights
+             clearHighlights();
+             currentSpokenBlock = null;
+         }
+
+        function clearHighlights() {
+             const highlightedElements = lessonContainer.querySelectorAll('.highlight');
+             highlightedElements.forEach(el => {
+                // Replace the span with its text content
+                 el.outerHTML = el.textContent;
+             });
+             wordSpans = []; // Clear the word spans array
+             currentWordIndex = 0;
+        }
+
+         function handleSpeakClick(event) {
+             const button = event.target.closest('button');
+             const block = button.closest('.translatable-block');
+             if (block) {
+                // If already speaking this block, stop it. Otherwise, start speaking.
+                if (synth.speaking && currentSpokenBlock === block) {
+                    stopSpeaking();
+                } else {
+                     speakBlockText(block);
+                }
+             }
+         }
+
+
+         function speakBlockText(blockElement) {
+             if (!blockElement || !synth) return;
+
+             stopSpeaking(); // Stop any previous speech first
+             currentSpokenBlock = blockElement; // Track the currently spoken block
+
+             // --- Prepare text and wrap words in spans ---
+             // Clone the block to avoid modifying the original with spans
+             const blockClone = blockElement.cloneNode(true);
+             // Remove controls etc. before processing text for speech
+             blockClone.querySelectorAll('.block-controls, .translation-hint, .quiz-container').forEach(el => el.remove());
+
+             // Use a recursive function to process text nodes within the clone
+             wordSpans = []; // Reset word spans array
+             let cleanText = ''; // Build the text string for the utterance
+
+             function wrapWordsInNode(node) {
+                 if (node.nodeType === Node.TEXT_NODE) {
+                     const text = node.textContent.trim();
+                     if (text.length > 0) {
+                         const words = text.split(/(\s+)/); // Split by whitespace, keeping delimiters
+                         const fragment = document.createDocumentFragment();
+                         words.forEach(word => {
+                             if (word.trim().length > 0) {
+                                 const span = document.createElement('span');
+                                 span.textContent = word;
+                                 span.classList.add('word-to-highlight'); // Add class to identify spans easily
+                                 fragment.appendChild(span);
+                                 wordSpans.push(span); // Store span reference for highlighting
+                                 cleanText += word; // Add word to the clean text
+                             } else if (word.length > 0) {
+                                 // Keep whitespace for natural pauses, add it to clean text
+                                 fragment.appendChild(document.createTextNode(word));
+                                 cleanText += word;
+                             }
+                         });
+                         node.parentNode.replaceChild(fragment, node);
+                     }
+                 } else if (node.nodeType === Node.ELEMENT_NODE) {
+                     // Add a space before block elements like P or LI for better sentence separation in cleanText
+                      if (['P', 'LI', 'H2', 'H3'].includes(node.tagName) && cleanText.length > 0 && !cleanText.endsWith(' ')) {
+                           cleanText += ' ';
+                       }
+                     // Recursively process child nodes
+                     Array.from(node.childNodes).forEach(wrapWordsInNode);
+                       // Add a space after block elements for better sentence separation
+                       if (['P', 'LI', 'H2', 'H3'].includes(node.tagName) && cleanText.length > 0 && !cleanText.endsWith(' ')) {
+                           cleanText += ' ';
+                       }
+                 }
+             }
+
+            // Start processing from the cloned block element
+             wrapWordsInNode(blockClone);
+
+             // Replace original block content with the span-wrapped version TEMPORARILY
+             // Find the corresponding elements in the original block to replace content
+             const originalContentContainer = blockElement.querySelector('h2, h3, p, ul'); // Adjust selector as needed
+             const clonedContentContainer = blockClone.querySelector('h2, h3, p, ul');
+             if(originalContentContainer && clonedContentContainer) {
+                 originalContentContainer.innerHTML = clonedContentContainer.innerHTML;
+                 // Re-query the spans from the *original* block now that they exist there
+                 wordSpans = Array.from(originalContentContainer.querySelectorAll('.word-to-highlight'));
+             } else {
+                  console.error("Could not find content container for TTS highlighting.");
+                  currentSpokenBlock = null;
+                  return; // Cannot proceed if containers not found
+             }
+
+
+             // --- Create and configure Utterance ---
+             utterance = new SpeechSynthesisUtterance(cleanText.trim());
+             utterance.lang = 'en-US';
+             utterance.rate = rateSlider.value || 1;
+             utterance.pitch = 1;
+             utterance.volume = 1;
+
+             currentWordIndex = 0; // Reset word index
+
+             // --- Event Listeners for Utterance ---
+             utterance.onboundary = (event) => {
+                 if (event.name === 'word' && wordSpans.length > currentWordIndex) {
+                    // Remove highlight from previous word(s) if any
+                     wordSpans.forEach(span => span.classList.remove('highlight'));
+                     // Highlight the current word span
+                    wordSpans[currentWordIndex].classList.add('highlight');
+                    currentWordIndex++;
+                 }
+             };
+
+             utterance.onend = () => {
+                  // Remove highlight from the last word
+                 wordSpans.forEach(span => span.classList.remove('highlight'));
+                 // Restore original block content (important!)
+                 updateContentForDifficulty(); // This re-renders the block based on data attributes
+                 currentSpokenBlock = null;
+                 currentWordIndex = 0;
+             };
+
+             utterance.onerror = (event) => {
+                 console.error('SpeechSynthesisUtterance Error:', event.error);
+                  updateContentForDifficulty(); // Restore original content on error too
+                 currentSpokenBlock = null;
+             };
+
+             // --- Speak ---
+             synth.speak(utterance);
+         }
+
+    </script>
+
+</body>
+</html>
